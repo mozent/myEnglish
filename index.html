@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>網頁目錄導覽</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            max-width: 600px;
+            margin: 40px auto;
+            padding: 0 20px;
+            color: #333;
+        }
+        h1 {
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+        }
+        ul {
+            list-style: none;
+            padding: 0;
+        }
+        li {
+            margin: 10px 0;
+        }
+        a {
+            color: #0066cc;
+            text-decoration: none;
+            font-size: 18px;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        .error {
+            color: #ff3333;
+            background: #ffe6e6;
+            padding: 10px;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>項目目錄索引</h1>
+    <ul id="file-list">
+        <li>正在掃描同層 HTML 檔案...</li>
+    </ul>
+
+    <script>
+        async function generateLinks() {
+            const fileList = document.getElementById('file-list');
+            
+            try {
+                // 1. 讀取當前目錄的內容（僅適用於開啟本地伺服器環境，如 Live Server 或 Python SimpleHTTPServer）
+                const response = await fetch('.');
+                if (!response.ok) throw new Error('無法讀取目錄，請確保已啟動本地伺服器環境。');
+                
+                const text = await response.text();
+                
+                // 2. 解析網頁內容中的超連結
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(text, 'text/html');
+                const links = Array.from(doc.querySelectorAll('a'));
+                
+                // 3. 過濾出所有以 .html 結尾且非 index.html 的檔案
+                const htmlFiles = links
+                    .map(link => link.getAttribute('href'))
+                    .filter(href => href && href.endsWith('.html') && href !== 'index.html');
+                
+                // 清空預設文字
+                fileList.innerHTML = '';
+                
+                if (htmlFiles.length === 0) {
+                    fileList.innerHTML = '<li>沒有找到其他 HTML 檔案。</li>';
+                    return;
+                }
+                
+                // 4. 動態渲染超連結清單
+                htmlFiles.forEach(file => {
+                    const li = document.createElement('li');
+                    const a = document.createElement('a');
+                    a.href = file;
+                    // 將檔名作為顯示文字（例如：about.html -> about）
+                    a.textContent = file.replace('.html', ''); 
+                    li.appendChild(a);
+                    fileList.appendChild(li);
+                });
+                
+            } catch (error) {
+                fileList.innerHTML = `<li class="error">⚠️ 錯誤: ${error.message}<br><small>提示：直接雙擊打開 HTML 檔案（file://）因瀏覽器安全限制無法讀取目錄，請使用 VS Code Live Server 或其他伺服器環境開啟。</small></li>`;
+            }
+        }
+
+        // 頁面載入時執行
+        window.addEventListener('DOMContentLoaded', generateLinks);
+    </script>
+</body>
+</html>
