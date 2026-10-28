@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>初級英文互動閱讀測驗 – Emma's Big Speech</title>
+<style>
+:root{--bg:#f4f7fb;--card:#fff;--ink:#1f2937;--mute:#6b7280;--line:#e5e7eb;--brand:#2563eb;--ok:#16a34a;--okbg:#dcfce7;--bad:#dc2626;--badbg:#fee2e2;--vocab:#dbeafe;--vocabink:#1d4ed8;--hl:#fde047}
+*{box-sizing:border-box}
+body{margin:0;font-family:-apple-system,"Segoe UI","Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;background:var(--bg);color:var(--ink);line-height:1.6}
+header{position:sticky;top:0;z-index:20;background:#fff;border-bottom:1px solid var(--line);box-shadow:0 1px 4px rgba(0,0,0,.05)}
+.bar{max-width:820px;margin:0 auto;padding:10px 16px;display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center}
+.stat{font-weight:700}
+.stat.ok{color:var(--ok)}.stat.bad{color:var(--bad)}
+.sp{flex:1}
+button{font:inherit;cursor:pointer}
+.btn{border:1px solid var(--brand);background:#fff;color:var(--brand);padding:6px 12px;border-radius:8px;font-weight:600}
+.btn:hover{background:#eff6ff}
+.btn.primary{background:var(--brand);color:#fff}
+.btn.primary:hover{background:#1d4ed8}
+.progress{height:4px;background:var(--line)}
+.progress div{height:100%;background:var(--brand);width:0;transition:width .3s}
+main{max-width:820px;margin:0 auto;padding:18px 16px 60px}
+.card{background:var(--card);border-radius:14px;padding:20px;box-shadow:0 2px 10px rgba(0,0,0,.06)}
+.badge{display:inline-block;font-size:12px;font-weight:700;padding:2px 10px;border-radius:99px;background:#e0e7ff;color:#3730a3;margin-bottom:8px}
+.stem{font-size:19px;font-weight:600;margin:4px 0 12px}
+.hintbtn{background:none;border:none;color:#b45309;font-weight:600;padding:4px 0}
+.hint{display:none;background:#fffbeb;border-left:4px solid #f59e0b;padding:8px 12px;margin:6px 0 12px;border-radius:6px;font-size:15px}
+.hint.show{display:block}
+.opt{display:block;width:100%;text-align:left;margin:8px 0;padding:12px 14px;border:2px solid var(--line);border-radius:10px;background:#fff;font-size:17px}
+.opt:hover:not(:disabled){border-color:var(--brand);background:#f8fafc}
+.opt.right{border-color:var(--ok);background:var(--okbg)}
+.opt.wrong{border-color:var(--bad);background:var(--badbg)}
+.opt:disabled{cursor:default}
+.explain{display:none;margin-top:12px;padding:10px 12px;border-radius:8px;background:#f1f5f9;font-size:15px}
+.explain.show{display:block}
+.nextrow{margin-top:14px;text-align:right}
+.modal{position:fixed;inset:0;background:rgba(15,23,42,.55);display:none;align-items:center;justify-content:center;z-index:50;padding:14px}
+.modal.show{display:flex}
+.panel{background:#fff;border-radius:14px;max-width:760px;width:100%;max-height:90vh;display:flex;flex-direction:column;overflow:hidden}
+.phead{display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid var(--line)}
+.phead h2{margin:0;font-size:18px;flex:1}
+.x{border:none;background:none;font-size:24px;color:var(--mute)}
+.pbody{padding:16px 20px;overflow:auto;font-size:18px;line-height:1.9}
+.pbody p{margin:0 0 14px}
+.tts{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:10px 16px;border-bottom:1px solid var(--line);background:#f8fafc;font-size:14px}
+.tts select{font:inherit;padding:3px 6px;border-radius:6px;border:1px solid var(--line)}
+.w.v{background:var(--vocab);color:var(--vocabink);border-radius:4px;padding:0 2px;cursor:pointer}
+.w.v:hover{background:#bfdbfe}
+.w.speaking{background:var(--hl)!important;color:#000!important;border-radius:4px}
+.tip{display:none;position:fixed;z-index:80;background:#fff;border:1px solid #93c5fd;box-shadow:0 8px 24px rgba(0,0,0,.2);border-radius:12px;padding:12px 14px;width:290px;font-size:15px;line-height:1.5}
+.tip.show{display:block}
+.tip .t{font-size:20px;font-weight:700;color:var(--vocabink)}
+.tip .ipa{color:var(--mute);margin:0 6px}
+.tip .sp2{border:none;background:#eff6ff;border-radius:50%;width:30px;height:30px}
+.tip .ex{margin-top:6px;padding-top:6px;border-top:1px dashed var(--line)}
+.tip .ex small{color:var(--mute)}
+.legend{font-size:13px;color:var(--mute);margin:0 0 10px}
+.legend span{background:var(--vocab);color:var(--vocabink);padding:0 4px;border-radius:4px}
+.big{font-size:56px;font-weight:800;color:var(--brand);text-align:center;margin:0}
+.rv{border-top:1px solid var(--line);padding:12px 0}
+.rv .q{font-weight:600}
+.rv .mk.ok{color:var(--ok);font-weight:700}.rv .mk.bad{color:var(--bad);font-weight:700}
+.rv small{color:var(--mute);display:block}
+@media(max-width:520px){.stem{font-size:17px}.opt{font-size:16px}.pbody{font-size:17px}}
+</style>
+</head>
+<body>
+<header>
+  <div class="bar">
+    <span class="stat" id="prog">題目 1/20</span>
+    <span class="stat ok">✓ 答對 <span id="cOk">0</span></span>
+    <span class="stat bad">✕ 答錯 <span id="cBad">0</span></span>
+    <span class="sp"></span>
+    <button class="btn" id="btnStory">📖 閱讀文章 (Read Story)</button>
+    <button class="btn" id="btnZh">🈶 中文翻譯</button>
+  </div>
+  <div class="progress"><div id="pbar"></div></div>
+</header>
+<main id="main"></main>
+
+<div class="modal" id="mStory">
+  <div class="panel">
+    <div class="phead"><h2>📖 Emma's Big Speech</h2><button class="x" data-close>×</button></div>
+    <div class="tts">
+      <button class="btn primary" id="tPlay">▶ 朗讀</button>
+      <button class="btn" id="tPause">⏸ 暫停</button>
+      <button class="btn" id="tStop">⏹ 停止</button>
+      <label>模式 <select id="tMode"><option value="word">逐字唸</option><option value="sent">逐句唸</option></select></label>
+      <label>速度 <select id="tRate"><option value="0.6">慢</option><option value="0.8" selected>稍慢</option><option value="1">正常</option></select></label>
+    </div>
+    <div class="pbody">
+      <p class="legend">藍底單字為國中核心 1,200 字，<span>點擊</span>可查看發音、中文意思與例句。</p>
+      <div id="storyBox"></div>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="mZh">
+  <div class="panel">
+    <div class="phead"><h2>🈶 全文中文翻譯</h2><button class="x" data-close>×</button></div>
+    <div class="pbody" id="zhBox"></div>
+  </div>
+</div>
+
+<div class="tip" id="tip"></div>
+
+<script>
+/* ================= 內容資料 ================= */
+const STORY = [
+ "Emma is a student in Taipei. Last week, her English teacher, Mr. Lin, asked everyone to give a short speech about a hobby. Emma was very nervous. She loves cooking, but she is shy and she hates speaking in front of the class.",
+ "For five days, Emma practiced every evening after dinner. Her older brother, Jack, helped her. “Don't worry,” he said. “Just give it a try. You will be fine.” Emma wanted to believe him, but on Thursday night she felt under the weather. Her head hurt and she could not sleep well.",
+ "On Friday morning, Emma was in a hurry because she woke up late. The bus was crowded and slow, so she arrived just before class. Her best friend, Amy, smiled and said, “Break a leg!”",
+ "Emma walked to the front of the room. Her hands were cold, but she took a deep breath and started. She talked about her favorite food, dumplings, and showed a photo of the dumplings she made with her grandmother. Everyone listened carefully. When she finished, the class clapped loudly.",
+ "“That was great!” said Mr. Lin. “Your speech was a piece of cake for you!” Emma laughed. Now she knows that being brave is not so hard. Once in a while, she still feels nervous, but she always remembers her brother's advice. Next month, she wants to join the speech club."
+];
+const ZH = [
+ "艾瑪是台北的一名學生。上週，她的英文老師林老師要求大家針對一項嗜好做一場簡短的演講。艾瑪非常緊張。她喜歡烹飪，但她很害羞，而且討厭在全班面前說話。",
+ "整整五天，艾瑪每天晚餐後的傍晚都在練習。她的哥哥傑克幫助她。「別擔心，」他說，「試試看就好。你會沒問題的。」艾瑪想要相信他，但星期四晚上她覺得身體不太舒服。她頭痛，也睡不太好。",
+ "星期五早上，艾瑪因為睡過頭而很匆忙。公車又擁擠又緩慢，所以她在上課前一刻才抵達。她最好的朋友艾咪微笑著說：「祝你好運！」",
+ "艾瑪走到教室前面。她的雙手冰冷，但她深吸了一口氣，開始演講。她談到她最喜愛的食物——水餃，並展示了一張她和外婆一起包水餃的照片。大家都專心聆聽。她講完時，全班熱烈鼓掌。",
+ "「太棒了！」林老師說。「對你來說，這場演講簡直是小事一樁！」艾瑪笑了。現在她知道，勇敢並沒有那麼難。偶爾她還是會緊張，但她always記得哥哥的建議。下個月，她想加入演講社。".replace("always","總是")
+];
+
+/* 國中核心 1,200 字詞彙：[詞形們, IPA, 詞性, 中文, 英文例句, 中文例句] */
+const VOCAB = [
+ [["student"],"ˈstudənt","n.","學生","She is a student at my school.","她是我們學校的學生。"],
+ [["week"],"wik","n.","星期；週","I have English class twice a week.","我一週上兩次英文課。"],
+ [["teacher"],"ˈtitʃɚ","n.","教師","Our teacher is very kind.","我們的老師非常親切。"],
+ [["asked","ask"],"æsk","v.","問；要求","He asked me a question.","他問了我一個問題。"],
+ [["everyone"],"ˈɛvriˌwʌn","pron.","每個人","Everyone likes her.","每個人都喜歡她。"],
+ [["short"],"ʃɔrt","adj.","短的；矮的","Please write a short story.","請寫一篇短篇故事。"],
+ [["hobby"],"ˈhɑbi","n.","嗜好","My hobby is taking photos.","我的嗜好是拍照。"],
+ [["nervous"],"ˈnɝvəs","adj.","緊張的","I feel nervous before a test.","考試前我會覺得緊張。"],
+ [["loves","love"],"lʌv","v./n.","愛；喜愛","She loves her dog very much.","她非常愛她的狗。"],
+ [["cooking","cook"],"ˈkʊkɪŋ","v./n.","煮飯；烹飪","My dad enjoys cooking on weekends.","我爸爸週末喜歡煮飯。"],
+ [["shy"],"ʃaɪ","adj.","害羞的","The shy boy did not say a word.","那個害羞的男孩一句話也沒說。"],
+ [["hates","hate"],"heɪt","v.","討厭；憎恨","He hates getting up early.","他討厭早起。"],
+ [["front"],"frʌnt","n.","前面","Please sit in the front of the class.","請坐在教室前面。"],
+ [["class"],"klæs","n.","班級；課堂","Our class has thirty students.","我們班有三十個學生。"],
+ [["practiced","practice"],"ˈpræktɪs","v./n.","練習","I practice the piano every day.","我每天練習鋼琴。"],
+ [["evening"],"ˈivnɪŋ","n.","傍晚；晚上","We take a walk every evening.","我們每天傍晚都散步。"],
+ [["dinner"],"ˈdɪnɚ","n.","晚餐","Dinner is ready!","晚餐準備好了！"],
+ [["brother","brother's"],"ˈbrʌðɚ","n.","兄弟","My brother is taller than me.","我哥哥比我高。"],
+ [["helped","help"],"hɛlp","v./n.","幫助","Can you help me with my homework?","你可以幫我寫功課嗎？"],
+ [["worry"],"ˈwɝi","v./n.","擔心","Don't worry. Everything is OK.","別擔心，一切都沒事。"],
+ [["fine"],"faɪn","adj.","良好的；沒問題的","I'm fine, thank you.","我很好，謝謝。"],
+ [["believe"],"bɪˈliv","v.","相信","I believe you.","我相信你。"],
+ [["night"],"naɪt","n.","夜晚","The stars are bright at night.","夜晚星星很明亮。"],
+ [["head"],"hɛd","n.","頭部","He hit his head on the door.","他的頭撞到門。"],
+ [["hurt"],"hɝt","v./adj.","受傷；疼痛","My leg hurts.","我的腿很痛。"],
+ [["sleep"],"slip","v./n.","睡覺","I go to sleep at ten.","我十點睡覺。"],
+ [["morning"],"ˈmɔrnɪŋ","n.","早上","Good morning, Mom!","媽媽，早安！"],
+ [["hurry"],"ˈhɝi","n./v.","匆忙；趕快","Hurry up, or we'll be late.","快一點，不然我們會遲到。"],
+ [["late"],"leɪt","adj./adv.","遲到的；晚的","Don't be late for school.","上學別遲到。"],
+ [["crowded"],"ˈkraʊdɪd","adj.","擁擠的","The MRT is always crowded at 8 a.m.","早上八點的捷運總是很擁擠。"],
+ [["slow"],"sloʊ","adj.","慢的","The turtle is very slow.","烏龜非常慢。"],
+ [["arrived","arrive"],"əˈraɪv","v.","到達","We arrived at the station at noon.","我們中午抵達車站。"],
+ [["best"],"bɛst","adj./adv.","最好的","Tom is my best friend.","湯姆是我最好的朋友。"],
+ [["friend"],"frɛnd","n.","朋友","She made a new friend.","她交了一位新朋友。"],
+ [["smiled","smile"],"smaɪl","v./n.","微笑","The baby smiled at me.","寶寶對我微笑。"],
+ [["leg"],"lɛg","n.","腿","The table has four legs.","這張桌子有四隻腳。"],
+ [["room"],"rum","n.","房間；空間","My room is on the second floor.","我的房間在二樓。"],
+ [["walked","walk"],"wɔk","v./n.","走路；散步","I walk to school.","我走路上學。"],
+ [["hands","hand"],"hænd","n.","手","Wash your hands before lunch.","午餐前要洗手。"],
+ [["cold"],"koʊld","adj./n.","冷的；感冒","It's cold today.","今天很冷。"],
+ [["deep"],"dip","adj./adv.","深的","The lake is very deep.","這座湖很深。"],
+ [["breath"],"brɛθ","n.","呼吸；氣息","Take a deep breath.","深呼吸。"],
+ [["started","start"],"stɑrt","v./n.","開始","The movie starts at seven.","電影七點開始。"],
+ [["talked","talk"],"tɔk","v./n.","說話；談話","They talked about their trip.","他們聊了他們的旅行。"],
+ [["favorite"],"ˈfeɪvərɪt","adj./n.","最喜愛的","Blue is my favorite color.","藍色是我最喜歡的顏色。"],
+ [["food"],"fud","n.","食物","I like Taiwanese food.","我喜歡台灣食物。"],
+ [["dumplings","dumpling"],"ˈdʌmplɪŋ","n.","水餃","We eat dumplings on New Year's Eve.","我們除夕吃水餃。"],
+ [["showed","show"],"ʃoʊ","v./n.","展示；表演","He showed me his new bike.","他給我看他的新腳踏車。"],
+ [["photo"],"ˈfoʊtoʊ","n.","照片","This is a photo of my family.","這是我家人的照片。"],
+ [["grandmother"],"ˈɡrænˌmʌðɚ","n.","祖母；外祖母","My grandmother tells great stories.","我奶奶很會講故事。"],
+ [["listened","listen"],"ˈlɪsn","v.","傾聽","Please listen carefully.","請仔細聽。"],
+ [["carefully"],"ˈkɛrfəli","adv.","仔細地（careful 的副詞）","Drive carefully on rainy days.","下雨天要小心開車。"],
+ [["finished","finish"],"ˈfɪnɪʃ","v.","完成；結束","I finished my homework.","我寫完功課了。"],
+ [["clapped","clap"],"klæp","v./n.","鼓掌","Everyone clapped for the singer.","大家為歌手鼓掌。"],
+ [["loudly","loud"],"ˈlaʊdli","adv.","大聲地（loud 的副詞）","Don't speak so loudly in the library.","別在圖書館講話那麼大聲。"],
+ [["great"],"ɡreɪt","adj.","偉大的；棒極了","That's a great idea!","這個主意太棒了！"],
+ [["laughed","laugh"],"læf","v./n.","大笑","We laughed at his joke.","我們被他的笑話逗笑了。"],
+ [["brave"],"breɪv","adj.","勇敢的","The firefighter is very brave.","那位消防員非常勇敢。"],
+ [["hard"],"hɑrd","adj./adv.","困難的；努力地","The test was not hard.","這次考試不難。"],
+ [["remembers","remember"],"rɪˈmɛmbɚ","v.","記得","I remember her name.","我記得她的名字。"],
+ [["advice"],"ədˈvaɪs","n.","建議；忠告","Thank you for your advice.","謝謝你的建議。"],
+ [["month"],"mʌnθ","n.","月份","There are twelve months in a year.","一年有十二個月。"],
+ [["join"],"dʒɔɪn","v.","參加；加入","I want to join the music club.","我想加入音樂社。"],
+ [["club"],"klʌb","n.","社團；俱樂部","She is in the art club.","她參加美術社。"]
+];
+const VMAP = {};
+VOCAB.forEach(e => e[0].forEach(f => VMAP[f] = e));
+
+/* 20 題：type R=閱讀理解 I=慣用語克漏字 G=文法 */
+const Q = [
+ {t:"R",q:"Why was Emma nervous at the beginning of the story?",o:["She forgot to bring her book.","She had to give a speech in front of her class.","She was late for the bus.","She lost her homework."],a:1,
+  h:"Paragraph 1: “Emma was very nervous… she hates speaking in front of the class.”",e:"第一段說明老師要大家做簡短演講，而艾瑪討厭在全班面前說話，所以她很緊張。"},
+ {t:"R",q:"What is Emma's hobby?",o:["Singing","Dancing","Cooking","Drawing"],a:2,
+  h:"Paragraph 1: “She loves cooking…”",e:"文中說她 loves cooking，所以嗜好是烹飪。"},
+ {t:"R",q:"Who helped Emma practice her speech?",o:["Her teacher","Her older brother","Her best friend","Her grandmother"],a:1,
+  h:"Paragraph 2: “Her older brother, Jack, helped her.”",e:"幫她練習的是哥哥傑克。"},
+ {t:"R",q:"What happened to Emma on Thursday night?",o:["She had a headache and could not sleep well.","She went to the hospital.","She cooked dinner for her family.","She wrote a letter to Amy."],a:0,
+  h:"Paragraph 2: “Her head hurt and she could not sleep well.”",e:"她頭痛且睡不好，因此感到身體不舒服。"},
+ {t:"R",q:"Why was Emma in a hurry on Friday morning?",o:["She woke up late.","She had a test.","She wanted to buy breakfast.","Her bus came early."],a:0,
+  h:"Paragraph 3: “…in a hurry because she woke up late.”",e:"because 後面說明原因：她睡晚了。"},
+ {t:"R",q:"What did Amy mean when she said, “Break a leg!”?",o:["“Be careful on the stairs.”","“Good luck!”","“Please sit down.”","“Run fast!”"],a:1,
+  h:"This is a popular saying used before a performance or speech.",e:"Break a leg 是在表演或演講前祝對方好運的慣用語。"},
+ {t:"R",q:"What did Emma talk about in her speech?",o:["Her school","Her trip to Japan","Her favorite food","Her pet dog"],a:2,
+  h:"Paragraph 4: “She talked about her favorite food, dumplings…”",e:"她談的是自己最愛的食物──水餃。"},
+ {t:"R",q:"What does Emma want to do next month?",o:["Move to a new city","Join the speech club","Learn the piano","Visit her grandmother"],a:1,
+  h:"Last sentence: “Next month, she wants to join the speech club.”",e:"最後一句說下個月她想加入演講社。"},
+ {t:"I",q:"“Don't be afraid. Just give it a ______.” (Complete the idiom.)",o:["try","gift","ride","walk"],a:0,
+  h:"Paragraph 2: Jack says, “Just give it a ____. You will be fine.” It means to attempt something.",e:"give it a try = 試試看。"},
+ {t:"I",q:"Emma felt under the ______ on Thursday night, so she could not sleep well.",o:["sun","weather","rain","moon"],a:1,
+  h:"Paragraph 2: “…she felt under the ______.” The idiom means “a little sick.”",e:"under the weather = 身體不太舒服。"},
+ {t:"I",q:"Before the show, her mom said, “Break a ______!”",o:["hand","leg","head","foot"],a:1,
+  h:"Paragraph 3: Amy says “Break a ____!” to wish Emma good luck.",e:"Break a leg! = 祝你好運（演出、演講前常用）。"},
+ {t:"I",q:"Mr. Lin said, “Your speech was a piece of ______ for you!” It means the speech was very easy.",o:["bread","candy","cake","pie"],a:2,
+  h:"Paragraph 5: “…a piece of ____ for you!” It is a sweet food often eaten at parties.",e:"a piece of cake = 輕而易舉的事。"},
+ {t:"I",q:"“I can't talk now. I'm in a ______ because the train leaves in five minutes.”",o:["box","bag","hurry","hole"],a:2,
+  h:"Paragraph 3: “Emma was in a ____ because she woke up late.”",e:"in a hurry = 匆忙、趕時間。"},
+ {t:"I",q:"I don't eat fast food often. I eat it only once in a ______.",o:["day","while","night","time"],a:1,
+  h:"Last paragraph: “Once in a ____, she still feels nervous.” It means “sometimes, not often.”",e:"once in a while = 偶爾。"},
+ {t:"G",q:"Last week, Emma's teacher ______ everyone to give a short speech.",o:["asks","asked","is asking","will ask"],a:1,
+  h:"Look at the time word: “Last week.” Which tense is for the past?",e:"Last week 表示過去，所以用過去式 asked。"},
+ {t:"G",q:"Emma ______ cooking, but she is shy.",o:["love","loves","loving","to love"],a:1,
+  h:"The subject “Emma” is third-person singular, and the sentence is in the present tense.",e:"第三人稱單數現在式動詞要加 s：loves。"},
+ {t:"G",q:"Emma's brother is ______ than she is.",o:["old","oldest","older","more old"],a:2,
+  h:"Paragraph 2: “Her ____ brother, Jack…” We are comparing two people.",e:"比較兩人用比較級：old → older。"},
+ {t:"G",q:"Emma wanted to believe her brother, ______ she was still afraid.",o:["so","because","but","or"],a:2,
+  h:"The two parts of the sentence show a contrast (opposite ideas).",e:"想相信「但」仍害怕，前後語意相反，用 but。"},
+ {t:"G",q:"Emma is good ______ cooking.",o:["in","at","on","for"],a:1,
+  h:"We say “good ___ + something” to talk about a skill.",e:"be good at + 名詞/動名詞 = 擅長……。"},
+ {t:"G",q:"If you practice more, you ______ get better.",o:["did","was","will","are"],a:2,
+  h:"The “If” clause talks about a possible future result.",e:"if 條件句的主要子句用 will + 原形動詞。"}
+];
+const TYPE_NAME = {R:"閱讀理解 Reading",I:"慣用語克漏字 Idiom Cloze",G:"文法 Grammar"};
+
+/* ================= 文章渲染 ================= */
+const wordEls = [];       // 依序的所有單字 span
+const sentences = [];     // 每句：{els:[...], text, offs:[...]}
+function buildStory(){
+  const box = document.getElementById('storyBox');
+  box.innerHTML = "";
+  wordEls.length = 0; sentences.length = 0;
+  let cur = {els:[],text:"",offs:[]};
+  STORY.forEach(par => {
+    const p = document.createElement('p');
+    const re = /([A-Za-z]+(?:'[A-Za-z]+)?)|([^A-Za-z]+)/g;
+    let m;
+    while((m = re.exec(par))){
+      if(m[1]){
+        const w = m[1], key = w.toLowerCase();
+        const s = document.createElement('span');
+        s.className = 'w'; s.textContent = w;
+        const entry = VMAP[key] || VMAP[key.replace(/'s$/,'')];
+        if(entry){ s.classList.add('v'); s.addEventListener('click', ev => { ev.stopPropagation(); showTip(entry, s, w); }); }
+        p.appendChild(s);
+        wordEls.push(s);
+        if(cur.text) cur.text += " ";
+        cur.offs.push(cur.text.length); cur.text += w; cur.els.push(s);
+      } else {
+        p.appendChild(document.createTextNode(m[2]));
+        if(/[.!?]/.test(m[2]) && cur.els.length){ sentences.push(cur); cur = {els:[],text:"",offs:[]}; }
+      }
+    }
+    if(cur.els.length){ sentences.push(cur); cur = {els:[],text:"",offs:[]}; }
+    box.appendChild(p);
+  });
+  document.getElementById('zhBox').innerHTML = ZH.map(t => `<p>${t}</p>`).join("");
+}
+
+/* ================= 單字 tooltip ================= */
+const tip = document.getElementById('tip');
+function speak(text, rate){
+  if(!('speechSynthesis' in window)) return;
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = 'en-US'; u.rate = rate || 0.85;
+  speechSynthesis.speak(u);
+}
+function showTip(e, el, shown){
+  tip.innerHTML = `<div><span class="t">${e[0][e[0].length>1 && e[0][0]===shown.toLowerCase()?0:0]}</span><span class="ipa">/${e[1]}/</span><button class="sp2" title="發音">🔊</button></div>
+   <div><b>${e[2]}</b> ${e[3]}</div>
+   <div class="ex">${e[4]}<br><small>${e[5]}</small></div>`;
+  tip.querySelector('.t').textContent = e[0][e[0].length-1];
+  tip.querySelector('.sp2').onclick = ev => { ev.stopPropagation(); speechSynthesis.cancel(); speak(e[0][e[0].length-1],0.8); };
+  tip.classList.add('show');
+  const r = el.getBoundingClientRect(), tw = 290;
+  let left = Math.min(Math.max(8, r.left), window.innerWidth - tw - 8);
+  let top = r.bottom + 6;
+  tip.style.left = left + 'px';
+  tip.style.top = top + 'px';
+  const th = tip.offsetHeight;
+  if(top + th > window.innerHeight - 8) tip.style.top = Math.max(8, r.top - th - 6) + 'px';
+}
+document.addEventListener('click', e => { if(!tip.contains(e.target)) tip.classList.remove('show'); });
+
+/* ================= 朗讀（逐字 / 逐句） ================= */
+let ttsToken = 0, paused = false;
+function clearHL(){ wordEls.forEach(w => w.classList.remove('speaking')); }
+function stopTTS(){ ttsToken++; paused = false; if('speechSynthesis' in window) speechSynthesis.cancel(); clearHL(); }
+function playTTS(){
+  if(!('speechSynthesis' in window)){ alert('此瀏覽器不支援語音朗讀'); return; }
+  if(paused){ speechSynthesis.resume(); paused = false; return; }
+  stopTTS();
+  const my = ++ttsToken;
+  const rate = parseFloat(document.getElementById('tRate').value);
+  const mode = document.getElementById('tMode').value;
+  if(mode === 'word'){
+    let i = 0;
+    const next = () => {
+      if(my !== ttsToken) return;
+      clearHL();
+      if(i >= wordEls.length) return;
+      const el = wordEls[i++]; el.classList.add('speaking');
+      el.scrollIntoView({block:'nearest',behavior:'smooth'});
+      const u = new SpeechSynthesisUtterance(el.textContent);
+      u.lang = 'en-US'; u.rate = rate;
+      u.onend = () => setTimeout(next, 120); u.onerror = () => setTimeout(next, 120);
+      speechSynthesis.speak(u);
+    };
+    next();
+  } else {
+    let si = 0;
+    const next = () => {
+      if(my !== ttsToken) return;
+      clearHL();
+      if(si >= sentences.length) return;
+      const s = sentences[si++];
+      s.els[0].classList.add('speaking');
+      s.els[0].scrollIntoView({block:'nearest',behavior:'smooth'});
+      const u = new SpeechSynthesisUtterance(s.text);
+      u.lang = 'en-US'; u.rate = rate;
+      u.onboundary = ev => {
+        if(my !== ttsToken || ev.name === 'sentence') return;
+        let k = 0; for(let j=0;j<s.offs.length;j++) if(s.offs[j] <= ev.charIndex) k = j;
+        s.els.forEach(w => w.classList.remove('speaking')); s.els[k].classList.add('speaking');
+      };
+      u.onend = next; u.onerror = next;
+      speechSynthesis.speak(u);
+    };
+    next();
+  }
+}
+document.getElementById('tPlay').onclick = playTTS;
+document.getElementById('tPause').onclick = () => { if('speechSynthesis' in window){ speechSynthesis.pause(); paused = true; } };
+document.getElementById('tStop').onclick = stopTTS;
+
+/* ================= Modal ================= */
+function openM(id){ document.getElementById(id).classList.add('show'); }
+function closeM(m){ m.classList.remove('show'); tip.classList.remove('show'); if(m.id==='mStory') stopTTS(); }
+document.getElementById('btnStory').onclick = () => openM('mStory');
+document.getElementById('btnZh').onclick = () => openM('mZh');
+document.querySelectorAll('.modal').forEach(m => {
+  m.addEventListener('click', e => { if(e.target === m) closeM(m); });
+  m.querySelector('[data-close]').onclick = () => closeM(m);
+});
+document.addEventListener('keydown', e => { if(e.key === 'Escape') document.querySelectorAll('.modal.show').forEach(closeM); });
+
+/* ================= 測驗邏輯 ================= */
+let qi = 0, ok = 0, bad = 0, picks = [];
+const main = document.getElementById('main');
+function updateBar(){
+  const shown = Math.min(qi+1, Q.length);
+  document.getElementById('prog').textContent = `題目 ${shown}/${Q.length}`;
+  document.getElementById('cOk').textContent = ok;
+  document.getElementById('cBad').textContent = bad;
+  document.getElementById('pbar').style.width = (qi / Q.length * 100) + '%';
+}
+function renderQ(){
+  updateBar();
+  const q = Q[qi];
+  main.innerHTML = `<div class="card">
+    <span class="badge">${TYPE_NAME[q.t]}</span>
+    <div class="stem">${qi+1}. ${q.q}</div>
+    <button class="hintbtn" id="hb">💡 提示 (Hint) ▾</button>
+    <div class="hint" id="hint">${q.h}</div>
+    <div id="opts"></div>
+    <div class="explain" id="ex"></div>
+    <div class="nextrow" id="nx" style="display:none"><button class="btn primary" id="nb">${qi === Q.length-1 ? '查看結果 ▶' : '下一題 ▶'}</button></div>
+  </div>`;
+  document.getElementById('hb').onclick = () => {
+    const h = document.getElementById('hint'); h.classList.toggle('show');
+    document.getElementById('hb').textContent = h.classList.contains('show') ? '💡 提示 (Hint) ▴' : '💡 提示 (Hint) ▾';
+  };
+  const box = document.getElementById('opts');
+  q.o.forEach((t,i) => {
+    const b = document.createElement('button');
+    b.className = 'opt'; b.textContent = String.fromCharCode(65+i) + '. ' + t;
+    b.onclick = () => answer(i);
+    box.appendChild(b);
+  });
+  document.getElementById('nb').onclick = () => { qi++; qi < Q.length ? renderQ() : renderResult(); window.scrollTo(0,0); };
+}
+function answer(i){
+  const q = Q[qi];
+  picks[qi] = i;
+  const btns = document.querySelectorAll('#opts .opt');
+  btns.forEach((b,k) => { b.disabled = true; if(k === q.a) b.classList.add('right'); });
+  if(i === q.a){ ok++; } else { bad++; btns[i].classList.add('wrong'); }
+  const ex = document.getElementById('ex');
+  ex.innerHTML = (i === q.a ? '✅ 答對了！' : `❌ 答錯了，正確答案是 ${String.fromCharCode(65+q.a)}。`) + '<br>' + q.e;
+  ex.classList.add('show');
+  document.getElementById('nx').style.display = 'block';
+  document.getElementById('cOk').textContent = ok;
+  document.getElementById('cBad').textContent = bad;
+}
+function renderResult(){
+  qi = Q.length; updateBar();
+  document.getElementById('prog').textContent = `完成 ${Q.length}/${Q.length}`;
+  const pct = Math.round(ok / Q.length * 100);
+  const msg = pct >= 90 ? '太厲害了！🎉' : pct >= 70 ? '做得不錯，繼續加油！👍' : pct >= 50 ? '再多讀幾次文章會更好喔！📖' : '別灰心，回頭看看文章再試一次吧！💪';
+  main.innerHTML = `<div class="card">
+    <h2 style="text-align:center;margin:0 0 6px">測驗結果</h2>
+    <p class="big">${ok} / ${Q.length}</p>
+    <p style="text-align:center;font-size:18px;margin:4px 0">答對率 <b>${pct}%</b>　✓ ${ok}　✕ ${bad}</p>
+    <p style="text-align:center;color:var(--mute)">${msg}</p>
+    <div style="text-align:center;margin:12px 0"><button class="btn primary" id="again">🔄 重新測驗</button>
+    <button class="btn" id="onlyWrong">只看答錯題</button></div>
+    <h3>各題複習清單</h3><div id="rvList"></div></div>`;
+  const list = document.getElementById('rvList');
+  const draw = onlyWrong => {
+    list.innerHTML = Q.map((q,i) => {
+      const good = picks[i] === q.a;
+      if(onlyWrong && good) return '';
+      return `<div class="rv"><div class="q"><span class="mk ${good?'ok':'bad'}">${good?'✓':'✕'}</span> ${i+1}. ${q.q} <small>【${TYPE_NAME[q.t]}】</small></div>
+        <small>你的答案：${picks[i]==null?'未作答':String.fromCharCode(65+picks[i])+'. '+q.o[picks[i]]}　｜　正確答案：${String.fromCharCode(65+q.a)}. ${q.o[q.a]}</small>
+        <small>${q.e}</small></div>`;
+    }).join('') || '<p>全部答對，沒有需要複習的題目 🎉</p>';
+  };
+  draw(false);
+  document.getElementById('again').onclick = () => { qi = 0; ok = 0; bad = 0; picks = []; renderQ(); window.scrollTo(0,0); };
+  document.getElementById('onlyWrong').onclick = () => draw(true);
+}
+
+buildStory();
+renderQ();
+</script>
+</body>
+</html>

@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>初級英文互動閱讀測驗 | Tom's Visit</title>
+<style>
+:root{--bg:#f4f6fb;--card:#fff;--ink:#1f2937;--mute:#6b7280;--line:#e5e7eb;--pri:#2563eb;--priL:#dbeafe;--ok:#15803d;--okL:#dcfce7;--bad:#b91c1c;--badL:#fee2e2;--vocab:#dbeafe;--vocabH:#bfdbfe;--speak:#fde047;--speakInk:#1f2937}
+@media(prefers-color-scheme:dark){:root{--bg:#0f172a;--card:#1e293b;--ink:#e5e7eb;--mute:#94a3b8;--line:#334155;--pri:#60a5fa;--priL:#1e3a8a;--ok:#4ade80;--okL:#14532d;--bad:#fca5a5;--badL:#7f1d1d;--vocab:#1e40af;--vocabH:#2563eb}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Segoe UI","Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;line-height:1.6}
+button{font:inherit;cursor:pointer;color:inherit}
+.topbar{position:sticky;top:0;z-index:50;background:var(--card);border-bottom:1px solid var(--line);box-shadow:0 2px 8px rgba(0,0,0,.06)}
+.topin{max-width:860px;margin:0 auto;padding:10px 16px;display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;justify-content:space-between}
+.stats{display:flex;gap:10px;align-items:center;font-weight:600}
+.pill{padding:3px 12px;border-radius:999px;background:var(--priL);white-space:nowrap}
+.pill.ok{background:var(--okL);color:var(--ok)}
+.pill.bad{background:var(--badL);color:var(--bad)}
+.tbtn{border:1px solid var(--pri);background:transparent;color:var(--pri);border-radius:8px;padding:6px 12px;font-weight:600}
+.tbtn:hover{background:var(--priL)}
+.actions{display:flex;gap:8px;flex-wrap:wrap}
+.bar{height:5px;background:var(--line)}
+.bar i{display:block;height:100%;width:0;background:var(--pri);transition:width .3s}
+main{max-width:860px;margin:0 auto;padding:20px 16px 60px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:22px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.tag{display:inline-block;font-size:.8rem;font-weight:700;padding:2px 10px;border-radius:6px;background:var(--priL);color:var(--pri);margin-bottom:10px}
+.qnum{color:var(--mute);font-size:.9rem;margin-left:8px}
+.stem{font-size:1.2rem;font-weight:600;margin:4px 0 16px}
+.opts{display:grid;gap:10px}
+.opt{display:flex;gap:12px;align-items:flex-start;text-align:left;width:100%;background:var(--card);border:2px solid var(--line);border-radius:10px;padding:12px 14px;font-size:1.05rem;transition:.15s}
+.opt:hover:not(:disabled){border-color:var(--pri);background:var(--priL)}
+.opt b{flex:none;width:28px;height:28px;border-radius:50%;background:var(--line);display:grid;place-items:center;font-size:.9rem}
+.opt:disabled{cursor:default}
+.opt.correct{border-color:var(--ok);background:var(--okL)}
+.opt.correct b{background:var(--ok);color:#fff}
+.opt.wrong{border-color:var(--bad);background:var(--badL)}
+.opt.wrong b{background:var(--bad);color:#fff}
+.hintbtn{margin-top:16px;border:1px dashed var(--mute);background:transparent;border-radius:8px;padding:6px 12px;color:var(--mute)}
+.hint{display:none;margin-top:10px;padding:10px 14px;border-left:4px solid #f59e0b;background:rgba(245,158,11,.12);border-radius:6px}
+.hint.show{display:block}
+.fb{display:none;margin-top:16px;padding:12px 14px;border-radius:8px;font-size:.98rem}
+.fb.show{display:block}
+.fb.ok{background:var(--okL);color:var(--ok)}
+.fb.bad{background:var(--badL);color:var(--bad)}
+.fb span{color:var(--ink)}
+.next{margin-top:18px;display:none;border:0;background:var(--pri);color:#fff;border-radius:10px;padding:10px 26px;font-weight:700;font-size:1.05rem}
+.next.show{display:inline-block}
+.dark-fix .next{color:#0f172a}
+/* result */
+.score{text-align:center;padding:10px 0 20px}
+.score .big{font-size:3.4rem;font-weight:800;color:var(--pri);line-height:1.1}
+.score .sub{color:var(--mute)}
+.ritem{border-top:1px solid var(--line);padding:14px 0}
+.ritem .h{font-weight:600}
+.ritem .m{font-size:.95rem;color:var(--mute)}
+.ritem .you.ok{color:var(--ok)}.ritem .you.bad{color:var(--bad)}
+.ritem .ex{font-size:.95rem;margin-top:4px}
+.row{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+.primary{border:0;background:var(--pri);color:#fff;border-radius:10px;padding:10px 22px;font-weight:700}
+@media(prefers-color-scheme:dark){.primary,.next{color:#0f172a}}
+/* modal */
+.mback{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;align-items:center;justify-content:center;z-index:500;padding:14px}
+.mback.open{display:flex}
+.modal{background:var(--card);border-radius:14px;max-width:760px;width:100%;max-height:92vh;display:flex;flex-direction:column;box-shadow:0 10px 40px rgba(0,0,0,.35)}
+.mhead{display:flex;justify-content:space-between;align-items:center;padding:12px 18px;border-bottom:1px solid var(--line);gap:10px}
+.mhead h2{margin:0;font-size:1.15rem}
+.x{border:0;background:transparent;font-size:1.5rem;line-height:1;color:var(--mute)}
+.mbody{overflow:auto;padding:6px 20px 20px;font-size:1.1rem}
+.mbody p{margin:.9em 0}
+.zh{color:var(--mute);font-size:1rem;margin-top:-.4em}
+.tts{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:10px 18px;border-bottom:1px solid var(--line);font-size:.92rem}
+.tts select{font:inherit;padding:4px 6px;border-radius:6px;border:1px solid var(--line);background:var(--card);color:var(--ink)}
+.legend{margin-left:auto;color:var(--mute)}
+.w{border-radius:3px;transition:background .1s}
+.vocab{background:var(--vocab);cursor:pointer;padding:0 2px;border-bottom:2px solid var(--pri)}
+.vocab:hover{background:var(--vocabH)}
+.w.speaking{background:var(--speak)!important;color:var(--speakInk)}
+/* tooltip */
+#tip{position:fixed;z-index:1000;display:none;width:min(320px,calc(100vw - 20px));background:var(--card);color:var(--ink);border:1px solid var(--pri);border-radius:12px;padding:12px 14px;box-shadow:0 8px 28px rgba(0,0,0,.3);font-size:.95rem}
+#tip .t1{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+#tip .wd{font-size:1.25rem;font-weight:800}
+#tip .ipa{color:var(--mute)}
+#tip .snd{border:1px solid var(--pri);background:var(--priL);border-radius:999px;padding:0 9px;color:var(--pri)}
+#tip .pos{color:var(--pri);font-size:.85rem;font-weight:700}
+#tip .zhm{font-weight:700;margin:4px 0}
+#tip .ex{border-top:1px dashed var(--line);padding-top:6px;margin-top:6px}
+#tip .exz{color:var(--mute)}
+footer{text-align:center;color:var(--mute);font-size:.82rem;padding:10px}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="topin">
+    <div class="stats">
+      <span class="pill" id="prog">1/20</span>
+      <span class="pill ok">✓ 答對 <span id="cOk">0</span></span>
+      <span class="pill bad">✕ 答錯 <span id="cBad">0</span></span>
+    </div>
+    <div class="actions">
+      <button class="tbtn" id="btnStory">📖 閱讀文章 (Read Story)</button>
+      <button class="tbtn" id="btnZh">🈶 中文翻譯</button>
+    </div>
+  </div>
+  <div class="bar"><i id="barfill"></i></div>
+</div>
+
+<main id="main"></main>
+<footer>單字藍底標示為國中 1,200 核心字，點擊可查看發音、中文與例句。 · 朗讀功能使用瀏覽器內建語音。</footer>
+
+<!-- Story modal -->
+<div class="mback" id="mStory"><div class="modal">
+  <div class="mhead"><h2>📖 Tom's Visit</h2><button class="x" data-close>×</button></div>
+  <div class="tts">
+    <button class="tbtn" id="ttsPlay">▶ 逐字朗讀</button>
+    <button class="tbtn" id="ttsPause">⏸ 暫停</button>
+    <button class="tbtn" id="ttsStop">⏹ 停止</button>
+    <label>速度 <select id="ttsRate"><option value="0.6">慢 0.6×</option><option value="0.8" selected>稍慢 0.8×</option><option value="1">正常 1×</option></select></label>
+    <span class="legend"><span class="w vocab">藍底</span> = 核心單字（可點擊）</span>
+  </div>
+  <div class="mbody" id="storyBody"></div>
+</div></div>
+
+<!-- Translation modal -->
+<div class="mback" id="mZh"><div class="modal">
+  <div class="mhead"><h2>🈶 全文中文翻譯</h2><button class="x" data-close>×</button></div>
+  <div class="mbody" id="zhBody"></div>
+</div></div>
+
+<div id="tip"></div>
+
+<script>
+"use strict";
+/* ============ 故事與翻譯 ============ */
+const TITLE="Tom's Visit";
+const STORY=[
+"Tom is a junior high school student in Taipei. Last Saturday, it was raining cats and dogs, so he stayed at home all morning. His mother asked him to clean his bedroom. While he was cleaning, he found an old photo of his grandfather. “I miss Grandpa,” Tom said quietly. His grandfather lives in a small village near the sea, and Tom had not seen him for six months.",
+"Tom decided to visit him that afternoon. He took a bus to the train station and bought a ticket. At first, he felt nervous because he had never traveled alone. Then a kind woman sat next to him and started to talk. She was a nurse, and she gave him some good advice about safety. Soon the ice was broken, and Tom felt much better.",
+"When the train arrived, the rain was light. Tom's grandfather was waiting at the station with an umbrella. “You are late!” he joked. “Better late than never,” Tom answered with a smile. They walked home together and made dumplings for dinner. Tom thought it would be a piece of cake, but his dumplings looked very funny. His grandfather laughed and said, “Practice makes perfect.”",
+"After dinner, they sat outside and looked at the stars. The sky was clear and beautiful. Tom felt happy and thankful. “I should visit you more often,” he said. “I only see you once in a blue moon.” His grandfather smiled and held his hand. “Come whenever you want,” he said. “My door is always open.”"
+];
+const ZH=[
+"湯姆是台北一名國中生。上週六下著傾盆大雨，所以他整個早上都待在家裡。媽媽請他打掃臥室。打掃的時候，他發現一張爺爺的舊照片。「我想念爺爺。」湯姆輕聲說。他的爺爺住在海邊的一個小村莊，而湯姆已經六個月沒有見到他了。",
+"湯姆決定當天下午去拜訪爺爺。他搭公車到火車站並買了車票。一開始，他覺得很緊張，因為他從來沒有獨自旅行過。後來，一位親切的女士坐在他旁邊，開始和他聊天。她是一名護理師，並給了他一些關於安全的好建議。很快地，彼此之間的隔閡就打破了，湯姆覺得好多了。",
+"火車抵達時，雨已經變小了。湯姆的爺爺拿著一把雨傘在車站等他。「你遲到了！」爺爺開玩笑地說。「遲到總比不到好。」湯姆微笑著回答。他們一起走路回家，並做了水餃當晚餐。湯姆以為這會輕而易舉，但他包的水餃看起來非常滑稽。爺爺笑了起來，說：「熟能生巧。」",
+"晚餐後，他們坐在外面看星星。天空晴朗又美麗。湯姆覺得快樂又感恩。「我應該多來看您，」他說。「我只有千載難逢的時候才能見到您一次。」爺爺微笑著握住他的手。「你想來隨時都可以來，」他說。「我的門永遠為你敞開。」"
+];
+const FULL=STORY.join(" ");
+
+/* ============ 核心單字（教育部 108 課綱國中 1,200 字範圍）============ */
+/* key: [詞性, 中文, 音標, 例句英, 例句中] */
+const D={
+student:["n.","學生","/ˈstudənt/","She is a good student.","她是個好學生。"],
+junior:["adj.","初級的；資淺的","/ˈdʒunjɚ/","He is in junior high school.","他就讀國中。"],
+high:["adj.","高的","/haɪ/","The mountain is very high.","那座山很高。"],
+school:["n.","學校","/skul/","We go to school by bus.","我們搭公車去上學。"],
+saturday:["n.","星期六","/ˈsætɚdeɪ/","We play ball on Saturday.","我們星期六打球。"],
+rain:["n./v.","雨；下雨","/reɪn/","It will rain tomorrow.","明天會下雨。"],
+stay:["v.","停留；待在","/steɪ/","Please stay here.","請待在這裡。"],
+morning:["n.","早上","/ˈmɔrnɪŋ/","I run every morning.","我每天早上跑步。"],
+mother:["n.","母親","/ˈmʌðɚ/","My mother cooks dinner.","我媽媽煮晚餐。"],
+ask:["v.","問；請求","/æsk/","May I ask a question?","我可以問個問題嗎？"],
+clean:["v./adj.","打掃；乾淨的","/klin/","Please clean your desk.","請整理你的書桌。"],
+bedroom:["n.","臥室","/ˈbɛdrum/","My bedroom is small.","我的臥室很小。"],
+find:["v.","找到；發現","/faɪnd/","I can't find my keys.","我找不到我的鑰匙。"],
+old:["adj.","老的；舊的","/oʊld/","This is an old book.","這是一本舊書。"],
+photo:["n.","照片","/ˈfoʊtoʊ/","She took a photo of the cat.","她替貓拍了照。"],
+grandfather:["n.","祖父；外祖父","/ˈɡrænfɑðɚ/","My grandfather tells good stories.","我爺爺很會講故事。"],
+miss:["v.","想念；錯過","/mɪs/","I miss my friends.","我想念我的朋友。"],
+live:["v.","居住","/lɪv/","They live in Taipei.","他們住在台北。"],
+small:["adj.","小的","/smɔl/","It is a small town.","這是個小鎮。"],
+village:["n.","村莊","/ˈvɪlɪdʒ/","The village is quiet.","這個村莊很安靜。"],
+sea:["n.","大海","/si/","The sea is blue.","海是藍色的。"],
+six:["n./adj.","六","/sɪks/","I have six books.","我有六本書。"],
+month:["n.","月份","/mʌnθ/","There are twelve months in a year.","一年有十二個月。"],
+decide:["v.","決定","/dɪˈsaɪd/","I decided to stay home.","我決定待在家。"],
+visit:["v./n.","拜訪；探望","/ˈvɪzɪt/","We visit Grandma on Sunday.","我們星期日去探望奶奶。"],
+afternoon:["n.","下午","/ˌæftɚˈnun/","See you this afternoon.","今天下午見。"],
+bus:["n.","公車","/bʌs/","I take the bus to school.","我搭公車上學。"],
+station:["n.","車站","/ˈsteɪʃən/","The station is near here.","車站離這裡很近。"],
+buy:["v.","買","/baɪ/","I want to buy a pen.","我想買一支筆。"],
+ticket:["n.","票","/ˈtɪkɪt/","I have a movie ticket.","我有一張電影票。"],
+nervous:["adj.","緊張的","/ˈnɝvəs/","I feel nervous before tests.","考試前我會緊張。"],
+never:["adv.","從不","/ˈnɛvɚ/","He never eats meat.","他從不吃肉。"],
+travel:["v./n.","旅行","/ˈtrævəl/","I like to travel by train.","我喜歡搭火車旅行。"],
+alone:["adj./adv.","獨自的","/əˈloʊn/","She walks home alone.","她獨自走路回家。"],
+kind:["adj.","仁慈的；親切的","/kaɪnd/","He is kind to animals.","他對動物很仁慈。"],
+woman:["n.","女性；女士","/ˈwʊmən/","The woman is a teacher.","那位女士是老師。"],
+sit:["v.","坐","/sɪt/","Please sit down.","請坐下。"],
+next:["adj.","下一個；旁邊的","/nɛkst/","Who is next?","下一位是誰？"],
+start:["v./n.","開始","/stɑrt/","The class starts at eight.","課程八點開始。"],
+talk:["v./n.","說話；談話","/tɔk/","We talk after class.","我們下課後聊天。"],
+nurse:["n.","護理師","/nɝs/","The nurse is friendly.","護理師很友善。"],
+good:["adj.","好的","/ɡʊd/","This is a good idea.","這是個好主意。"],
+advice:["n.","建議；忠告","/ədˈvaɪs/","Thank you for your advice.","謝謝你的建議。"],
+safety:["n.","安全","/ˈseɪfti/","Safety comes first.","安全第一。"],
+soon:["adv.","很快地","/sun/","Dinner will be ready soon.","晚餐很快就好。"],
+feel:["v.","感覺","/fil/","I feel tired.","我覺得累。"],
+much:["adv./adj.","許多；非常","/mʌtʃ/","Thank you very much.","非常感謝。"],
+better:["adj./adv.","更好的","/ˈbɛtɚ/","I feel better today.","我今天覺得好多了。"],
+arrive:["v.","到達","/əˈraɪv/","We arrive at noon.","我們中午抵達。"],
+light:["adj./n.","輕的；淡的；光","/laɪt/","The rain is light today.","今天雨很小。"],
+wait:["v.","等待","/weɪt/","Wait for me!","等等我！"],
+umbrella:["n.","雨傘","/ʌmˈbrɛlə/","Take an umbrella with you.","帶把傘去吧。"],
+joke:["v./n.","開玩笑；笑話","/dʒoʊk/","He likes to joke.","他愛開玩笑。"],
+late:["adj./adv.","遲到的；晚的","/leɪt/","Don't be late.","別遲到。"],
+answer:["v./n.","回答；答案","/ˈænsɚ/","Please answer the question.","請回答問題。"],
+smile:["n./v.","微笑","/smaɪl/","She has a nice smile.","她笑容很美。"],
+walk:["v./n.","走路；散步","/wɔk/","I walk to school.","我走路上學。"],
+together:["adv.","一起","/təˈɡɛðɚ/","Let's study together.","我們一起讀書吧。"],
+home:["n./adv.","家；在家","/hoʊm/","I go home at five.","我五點回家。"],
+dumpling:["n.","水餃","/ˈdʌmplɪŋ/","I love pork dumplings.","我愛吃豬肉水餃。"],
+dinner:["n.","晚餐","/ˈdɪnɚ/","Dinner is at six.","晚餐六點開始。"],
+look:["v./n.","看；看起來","/lʊk/","You look happy.","你看起來很開心。"],
+funny:["adj.","好笑的；滑稽的","/ˈfʌni/","The movie is funny.","這部電影很好笑。"],
+laugh:["v./n.","大笑","/læf/","We laugh a lot.","我們常常大笑。"],
+practice:["n./v.","練習","/ˈpræktɪs/","I practice piano every day.","我每天練習鋼琴。"],
+perfect:["adj.","完美的","/ˈpɝfɪkt/","Your answer is perfect.","你的答案很完美。"],
+outside:["adv./prep.","在外面","/ˌaʊtˈsaɪd/","Let's play outside.","我們到外面玩吧。"],
+star:["n.","星星；明星","/stɑr/","I can see many stars.","我看得到很多星星。"],
+sky:["n.","天空","/skaɪ/","The sky is blue.","天空是藍的。"],
+clear:["adj.","清楚的；晴朗的","/klɪr/","It's a clear night.","這是個晴朗的夜晚。"],
+beautiful:["adj.","美麗的","/ˈbjutəfəl/","What a beautiful day!","多美好的一天！"],
+happy:["adj.","快樂的","/ˈhæpi/","I'm happy to see you.","見到你我很開心。"],
+should:["aux.","應該","/ʃʊd/","You should sleep early.","你應該早點睡。"],
+more:["adj./adv.","更多的","/mɔr/","I want more water.","我想要更多水。"],
+often:["adv.","常常","/ˈɔfən/","We often eat out.","我們常外食。"],
+only:["adv.","只有","/ˈoʊnli/","I have only one pen.","我只有一支筆。"],
+hold:["v.","握住；舉辦","/hoʊld/","Hold my hand.","握住我的手。"],
+hand:["n.","手","/hænd/","Wash your hands.","把手洗乾淨。"],
+want:["v.","想要","/wɑnt/","I want some water.","我想喝水。"],
+door:["n.","門","/dɔr/","Please close the door.","請關門。"],
+always:["adv.","總是","/ˈɔlweɪz/","She is always on time.","她總是準時。"],
+while:["conj.","當……的時候","/waɪl/","Don't talk while eating.","吃東西時別說話。"]
+};
+const F={raining:"rain",stayed:"stay",asked:"ask",cleaning:"clean",found:"find",lives:"live",months:"month",decided:"decide",bought:"buy",traveled:"travel",started:"start",laughed:"laugh",walked:"walk",stars:"star",looked:"look",smiled:"smile",joked:"joke",arrived:"arrive",felt:"feel",sat:"sit",held:"hold",dumplings:"dumpling",grandpa:null};
+function lookup(w){
+  let k=w.toLowerCase().replace(/'s$/,"");
+  if(D[k])return k;
+  if(F[k]&&D[F[k]])return F[k];
+  if(k.endsWith("s")&&D[k.slice(0,-1)])return k.slice(0,-1);
+  return null;
+}
+
+/* ============ 題庫（20 題）============ */
+const T_R="閱讀理解 Reading Comprehension",T_I="慣用語克漏字 Idiom Cloze",T_G="初級文法 Grammar";
+const Q=[
+{t:T_R,q:"Why did Tom stay at home last Saturday?",o:["He was sick.","It was raining heavily.","He had a test.","His mother was angry."],a:1,
+ h:"第 1 段第 2 句：「it was raining cats and dogs, so he stayed at home all morning.」",
+ e:"文中說 raining cats and dogs（下傾盆大雨），所以他待在家。"},
+{t:T_R,q:"What did Tom find in his bedroom?",o:["A letter from his friend.","A ticket to the village.","An old photo of his grandfather.","A new umbrella."],a:2,
+ h:"第 1 段：「While he was cleaning, he found an old photo of …」",
+ e:"打掃臥室時他發現一張爺爺的舊照片。"},
+{t:T_R,q:"Where does Tom's grandfather live?",o:["In a small village near the sea.","In Taipei.","Next to the train station.","In a big city."],a:0,
+ h:"第 1 段最後一句：「His grandfather lives in a small village …」",
+ e:"爺爺住在海邊的小村莊；Taipei 是湯姆住的地方。"},
+{t:T_R,q:"How did Tom feel at first on the train?",o:["Excited","Angry","Nervous","Sleepy"],a:2,
+ h:"第 2 段：「At first, he felt ____ because he had never traveled alone.」",
+ e:"因為從沒獨自旅行過，所以一開始他很緊張 (nervous)。"},
+{t:T_R,q:"Who sat next to Tom and talked to him?",o:["A teacher","A nurse","A police officer","A bus driver"],a:1,
+ h:"第 2 段：「She was a nurse, and she gave him some good advice …」",
+ e:"坐在他旁邊的親切女士是一名護理師 (nurse)。"},
+{t:T_R,q:"Why did Tom's grandfather bring an umbrella to the station?",o:["The sun was too hot.","He wanted to give it as a gift.","The rain was still falling lightly.","He forgot to put it at home."],a:2,
+ h:"第 3 段第 1 句：「When the train arrived, the rain was light.」",
+ e:"火車到站時雨還下得很小，所以爺爺帶傘去接他。"},
+{t:T_R,q:"What happened to Tom's dumplings?",o:["They were delicious.","They looked very funny.","They were too salty.","They fell on the floor."],a:1,
+ h:"第 3 段：「…but his dumplings looked very funny.」",
+ e:"湯姆的水餃看起來很滑稽 (funny)，爺爺因此笑了。"},
+{t:T_R,q:"What did Tom and his grandfather do after dinner?",o:["They watched TV.","They played cards.","They cleaned the kitchen.","They looked at the stars."],a:3,
+ h:"第 4 段第 1 句：「After dinner, they sat outside and looked at …」",
+ e:"晚餐後他們坐在外面看星星。"},
+{t:T_R,q:"How does Tom feel at the end of the story?",o:["Happy and thankful","Tired and bored","Worried and shy","Sad and lonely"],a:0,
+ h:"第 4 段：「Tom felt ____ and thankful.」",
+ e:"文中直接寫 Tom felt happy and thankful。"},
+{t:T_R,q:"Which is the best title for the story?",o:["Tom Learns to Cook","A Nurse on a Train","A Rainy Day at School","A Trip to See Grandpa"],a:3,
+ h:"想想整篇故事的主軸：Tom 做了什麼決定？去了哪裡？",
+ e:"整篇故事圍繞 Tom 搭火車去探望爺爺，故最適合的標題是 A Trip to See Grandpa。"},
+
+{t:T_I,q:"Last Saturday it was raining ______, so Tom stayed at home.",o:["up and down","here and there","cats and dogs","black and white"],a:2,
+ h:"第 1 段第 2 句。形容雨下得非常大的慣用語。",
+ e:"rain cats and dogs = 下傾盆大雨。"},
+{t:T_I,q:"To ______, the kind woman started a friendly talk with Tom.",o:["break a leg","break the ice","break the rule","break his heart"],a:1,
+ h:"第 2 段：「Soon the ice was broken, and Tom felt much better.」",
+ e:"break the ice = 打破僵局、讓初次見面的氣氛變輕鬆。break a leg 是「祝你好運」。"},
+{t:T_I,q:"“You are late!” “______,” Tom answered with a smile.",o:["Time is money","Easy come, easy go","Better late than never","Out of sight, out of mind"],a:2,
+ h:"第 3 段：Tom 對爺爺說「你遲到了」的回答。",
+ e:"Better late than never = 遲到總比不到好。"},
+{t:T_I,q:"Tom thought making dumplings would be ______, but it was not easy.",o:["a hot potato","a big cheese","a drop in the bucket","a piece of cake"],a:3,
+ h:"第 3 段：「Tom thought it would be ____, but his dumplings looked very funny.」",
+ e:"a piece of cake = 輕而易舉的事。"},
+{t:T_I,q:"Tom lives far from his grandfather, so he sees him only ______.",o:["all the time","once in a blue moon","again and again","day by day"],a:1,
+ h:"第 4 段：「I only see you ____.」表示「很少、難得」。",
+ e:"once in a blue moon = 千載難逢、極少有。"},
+
+{t:T_G,q:"Tom ______ a junior high school student.",o:["am","is","are","be"],a:1,
+ h:"主詞 Tom 是第三人稱單數，現在式 be 動詞用哪一個？",
+ e:"第三人稱單數主詞搭配 is。"},
+{t:T_G,q:"Last Saturday, Tom ______ a bus to the train station.",o:["take","takes","took","taking"],a:2,
+ h:"句子有 Last Saturday，表示過去的時間。",
+ e:"過去式用 took（take 的不規則變化）。"},
+{t:T_G,q:"Tom is ______ than his grandfather.",o:["youngest","young","more young","younger"],a:3,
+ h:"出現 than，表示兩者比較；young 是單音節形容詞。",
+ e:"單音節形容詞比較級加 -er：younger than。"},
+{t:T_G,q:"There ______ many stars in the sky last night.",o:["is","were","was","are"],a:1,
+ h:"stars 是複數名詞，且 last night 表示過去。",
+ e:"複數名詞 + 過去式 → There were。"},
+{t:T_G,q:"Tom felt nervous ______ he had never traveled alone.",o:["but","so","because","or"],a:2,
+ h:"後半句說明前半句「緊張」的原因。",
+ e:"because 引導原因：因為他從沒獨自旅行過。"}
+];
+
+/* ============ 狀態 ============ */
+const LET=["A","B","C","D"];
+let cur=0,okN=0,badN=0,ans=new Array(Q.length).fill(null),done=false;
+const $=id=>document.getElementById(id);
+const main=$("main");
+
+function updateTop(){
+  const n=done?Q.length:cur+1;
+  $("prog").textContent=n+"/"+Q.length;
+  $("cOk").textContent=okN;$("cBad").textContent=badN;
+  $("barfill").style.width=((done?Q.length:cur)/Q.length*100)+"%";
+}
+
+function renderQ(){
+  const q=Q[cur];
+  main.innerHTML="";
+  const c=document.createElement("div");c.className="card";
+  c.innerHTML='<span class="tag"></span><span class="qnum"></span><div class="stem"></div><div class="opts"></div>'+
+  '<button class="hintbtn">💡 提示 (Hint)</button><div class="hint"></div><div class="fb"></div><button class="next"></button>';
+  c.querySelector(".tag").textContent=q.t;
+  c.querySelector(".qnum").textContent="Question "+(cur+1);
+  c.querySelector(".stem").textContent=q.q;
+  const box=c.querySelector(".opts");
+  q.o.forEach((txt,i)=>{
+    const b=document.createElement("button");b.className="opt";
+    b.innerHTML="<b>"+LET[i]+"</b><span></span>";b.lastChild.textContent=txt;
+    b.onclick=()=>pick(i,c);box.appendChild(b);
+  });
+  const hint=c.querySelector(".hint"),hb=c.querySelector(".hintbtn");
+  hint.textContent=q.h;
+  hb.onclick=()=>{const s=hint.classList.toggle("show");hb.textContent=s?"💡 收起提示":"💡 提示 (Hint)"};
+  const nx=c.querySelector(".next");
+  nx.textContent=cur===Q.length-1?"查看結果 →":"下一題 →";
+  nx.onclick=()=>{if(cur===Q.length-1){done=true;renderResult()}else{cur++;renderQ()}updateTop();window.scrollTo({top:0,behavior:"smooth"})};
+  main.appendChild(c);updateTop();
+}
+
+function pick(i,c){
+  if(ans[cur]!==null)return;
+  const q=Q[cur];ans[cur]=i;
+  const opts=c.querySelectorAll(".opt");
+  opts.forEach((b,k)=>{b.disabled=true;if(k===q.a)b.classList.add("correct");});
+  const fb=c.querySelector(".fb");
+  if(i===q.a){okN++;fb.className="fb show ok";fb.innerHTML="✓ 答對了！ <span></span>";}
+  else{badN++;opts[i].classList.add("wrong");fb.className="fb show bad";fb.innerHTML="✕ 答錯了，正確答案是 <b>"+LET[q.a]+"</b>。 <span></span>";}
+  fb.querySelector("span").textContent=q.e;
+  c.querySelector(".next").classList.add("show");
+  updateTop();
+}
+
+function renderResult(){
+  const pct=Math.round(okN/Q.length*100);
+  let msg=pct>=90?"太棒了！你已經掌握得很好 🎉":pct>=70?"表現不錯，再複習錯題會更好 👍":pct>=50?"還可以，建議重讀文章後再挑戰 📖":"別氣餒，先讀文章並善用提示再試一次 💪";
+  main.innerHTML="";
+  const c=document.createElement("div");c.className="card";
+  c.innerHTML='<div class="score"><div class="big"></div><div class="sub"></div><div class="msg" style="margin-top:6px;font-weight:600"></div></div><div class="row"><button class="primary" id="again">🔄 重新測驗</button><button class="tbtn" id="again2">📖 閱讀文章</button></div><h3 style="margin-top:22px">各題複習清單</h3><div id="rev"></div>';
+  c.querySelector(".big").textContent=okN+" / "+Q.length;
+  c.querySelector(".sub").textContent="答對率 "+pct+"%　（✓ "+okN+"　✕ "+badN+"）";
+  c.querySelector(".msg").textContent=msg;
+  const rev=c.querySelector("#rev");
+  Q.forEach((q,i)=>{
+    const ok=ans[i]===q.a;
+    const d=document.createElement("div");d.className="ritem";
+    d.innerHTML='<div class="h"></div><div class="m"></div><div class="ex"></div>';
+    d.querySelector(".h").textContent=(ok?"✓ ":"✕ ")+(i+1)+". "+q.q;
+    const m=d.querySelector(".m");
+    m.innerHTML='<span class="tag" style="margin:0 8px 0 0"></span><span class="you '+(ok?"ok":"bad")+'"></span> <span class="cor"></span>';
+    m.querySelector(".tag").textContent=q.t;
+    m.querySelector(".you").textContent="你的答案："+LET[ans[i]]+". "+q.o[ans[i]];
+    m.querySelector(".cor").textContent=ok?"":"｜正確答案："+LET[q.a]+". "+q.o[q.a];
+    d.querySelector(".ex").textContent="解析："+q.e+"　線索："+q.h;
+    rev.appendChild(d);
+  });
+  main.appendChild(c);
+  $("again").onclick=restart;$("again2").onclick=()=>openM("mStory");
+  updateTop();
+}
+function restart(){cur=0;okN=0;badN=0;ans.fill(null);done=false;renderQ();window.scrollTo({top:0})}
+
+/* ============ Modal ============ */
+function openM(id){$(id).classList.add("open");hideTip();}
+function closeM(el){el.classList.remove("open");hideTip();if(el.id==="mStory")stopSpeak();}
+document.querySelectorAll(".mback").forEach(m=>{
+  m.addEventListener("click",e=>{if(e.target===m||e.target.hasAttribute("data-close"))closeM(m)});
+});
+document.addEventListener("keydown",e=>{if(e.key==="Escape"){hideTip();document.querySelectorAll(".mback.open").forEach(closeM)}});
+$("btnStory").onclick=()=>openM("mStory");
+$("btnZh").onclick=()=>openM("mZh");
+
+/* ============ 故事渲染（藍底單字 + 逐字朗讀用）============ */
+let wordEls=[];
+function renderStory(){
+  const el=$("storyBody");el.innerHTML="";wordEls=[];let offset=0;
+  STORY.forEach(p=>{
+    const pe=document.createElement("p");let last=0,m;const re=/[A-Za-z]+(?:'[A-Za-z]+)?/g;
+    while((m=re.exec(p))){
+      if(m.index>last)pe.appendChild(document.createTextNode(p.slice(last,m.index)));
+      const s=document.createElement("span");s.className="w";s.textContent=m[0];
+      const k=lookup(m[0]);if(k){s.classList.add("vocab");s.dataset.k=k;}
+      wordEls.push({el:s,start:offset+m.index});
+      pe.appendChild(s);last=m.index+m[0].length;
+    }
+    pe.appendChild(document.createTextNode(p.slice(last)));
+    el.appendChild(pe);offset+=p.length+1;
+  });
+}
+function renderZh(){
+  const el=$("zhBody");el.innerHTML="";
+  STORY.forEach((p,i)=>{
+    const a=document.createElement("p");a.textContent=p;
+    const b=document.createElement("p");b.className="zh";b.textContent=ZH[i];
+    el.appendChild(a);el.appendChild(b);
+  });
+}
+
+/* ============ 單字 tooltip ============ */
+const tip=$("tip");
+function speakWord(t){
+  if(!("speechSynthesis" in window))return;
+  stopSpeak();
+  const u=new SpeechSynthesisUtterance(t);u.lang="en-US";u.rate=.85;const v=pickVoice();if(v)u.voice=v;
+  speechSynthesis.speak(u);
+}
+function showTip(span){
+  const k=span.dataset.k,d=D[k];if(!d)return;
+  tip.innerHTML='<div class="t1"><span class="wd"></span><span class="ipa"></span><button class="snd" title="發音">🔊</button><span class="pos"></span></div><div class="zhm"></div><div class="ex"><div class="en"></div><div class="exz"></div></div>';
+  tip.querySelector(".wd").textContent=k;
+  tip.querySelector(".ipa").textContent=d[2];
+  tip.querySelector(".pos").textContent=d[0];
+  tip.querySelector(".zhm").textContent=d[1];
+  tip.querySelector(".en").textContent=d[3];
+  tip.querySelector(".exz").textContent=d[4];
+  tip.querySelector(".snd").onclick=e=>{e.stopPropagation();speakWord(k)};
+  tip.style.display="block";
+  const r=span.getBoundingClientRect(),tw=tip.offsetWidth,th=tip.offsetHeight;
+  let left=Math.min(Math.max(8,r.left),window.innerWidth-tw-8);
+  let top=r.bottom+8;if(top+th>window.innerHeight-8)top=Math.max(8,r.top-th-8);
+  tip.style.left=left+"px";tip.style.top=top+"px";
+  speakWord(k);
+}
+function hideTip(){tip.style.display="none"}
+document.addEventListener("click",e=>{
+  const w=e.target.closest(".vocab");
+  if(w){showTip(w);return;}
+  if(!e.target.closest("#tip"))hideTip();
+});
+
+/* ============ 逐字朗讀 ============ */
+let curW=-1,fbTimer=null,gotB=false,speaking=false,pausedFlag=false;
+function pickVoice(){
+  if(!("speechSynthesis" in window))return null;
+  const vs=speechSynthesis.getVoices();
+  return vs.find(v=>/en-US/i.test(v.lang)&&/natural|google|samantha|aria|jenny/i.test(v.name))||vs.find(v=>/en-US/i.test(v.lang))||vs.find(v=>/^en/i.test(v.lang))||null;
+}
+if("speechSynthesis" in window){speechSynthesis.onvoiceschanged=()=>{};}
+function mark(i){
+  if(i===curW)return;
+  if(curW>=0&&wordEls[curW])wordEls[curW].el.classList.remove("speaking");
+  curW=i;
+  if(i>=0&&wordEls[i]){const el=wordEls[i].el;el.classList.add("speaking");
+    const box=$("storyBody"),r=el.getBoundingClientRect(),b=box.getBoundingClientRect();
+    if(r.top<b.top+20||r.bottom>b.bottom-20)box.scrollTop+=r.top-b.top-b.height/3;}
+}
+function markAt(ci){let idx=0;for(let i=0;i<wordEls.length;i++){if(wordEls[i].start<=ci)idx=i;else break}mark(idx)}
+function stopSpeak(){
+  if("speechSynthesis" in window)speechSynthesis.cancel();
+  clearInterval(fbTimer);fbTimer=null;speaking=false;pausedFlag=false;gotB=false;mark(-1);
+  const p=$("ttsPause");if(p)p.textContent="⏸ 暫停";
+}
+function playStory(){
+  if(!("speechSynthesis" in window)){alert("此瀏覽器不支援語音朗讀。");return;}
+  stopSpeak();
+  const rate=parseFloat($("ttsRate").value);
+  const u=new SpeechSynthesisUtterance(FULL);u.lang="en-US";u.rate=rate;
+  const v=pickVoice();if(v)u.voice=v;
+  u.onboundary=e=>{if(e.name&&e.name!=="word")return;gotB=true;clearInterval(fbTimer);fbTimer=null;markAt(e.charIndex)};
+  u.onend=()=>{clearInterval(fbTimer);fbTimer=null;speaking=false;mark(-1)};
+  u.onerror=()=>{clearInterval(fbTimer);fbTimer=null;speaking=false;mark(-1)};
+  speaking=true;speechSynthesis.speak(u);
+  /* 備援：若瀏覽器不回報 boundary 事件，依語速估算逐字高亮 */
+  setTimeout(()=>{
+    if(speaking&&!gotB&&!fbTimer){
+      let i=0;mark(0);
+      fbTimer=setInterval(()=>{if(pausedFlag)return;i++;if(i>=wordEls.length){clearInterval(fbTimer);fbTimer=null;return}mark(i)},Math.round(400/rate));
+    }
+  },1500);
+}
+$("ttsPlay").onclick=playStory;
+$("ttsStop").onclick=stopSpeak;
+$("ttsPause").onclick=()=>{
+  if(!speaking||!("speechSynthesis" in window))return;
+  if(!pausedFlag){speechSynthesis.pause();pausedFlag=true;$("ttsPause").textContent="▶ 繼續";}
+  else{speechSynthesis.resume();pausedFlag=false;$("ttsPause").textContent="⏸ 暫停";}
+};
+
+/* ============ 啟動 ============ */
+renderStory();renderZh();renderQ();
+</script>
+</body>
+</html>
